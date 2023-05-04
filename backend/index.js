@@ -19,6 +19,11 @@ app.get("/", (req, res) => {
   res.send("Hello server is started");
 });
 
+io.on("connection", (socket) => {
+  console.log(`user connected of the id: ${socket.id}`);
+  socket.on("user-login", (data) => console.log("server", data));
+});
+
 const PORT = process.env.PORT || 3005;
 
 server.listen(PORT, () => {
