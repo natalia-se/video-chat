@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Bg from "../images/bg-image.jpg";
 import clsx from "clsx";
+import io from "socket.io-client";
+
+let socket = null;
 
 const isUsernameValid = (username) => {
   return username.length > 0 && username.length < 10 && !username.includes(" ");
@@ -10,9 +13,11 @@ const isUsernameValid = (username) => {
 const LoginPage = () => {
   const [username, setUsername] = useState("");
   const navigate = useNavigate();
+  socket = io("http://localhost:3005");
 
   const handleLogin = () => {
     /* Add sending to socket.io */
+    socket.emit("user-login", username);
     navigate("/videochat");
   };
 
