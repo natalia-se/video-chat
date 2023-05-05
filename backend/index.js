@@ -15,13 +15,15 @@ const io = new Server(server, {
   },
 });
 
+let onlineUsers = {};
+
 app.get("/", (req, res) => {
   res.send("Hello server is started");
 });
 
 io.on("connection", (socket) => {
   console.log(`user connected of the id: ${socket.id}`);
-  socket.on("user-login", (data) => console.log("server", data));
+  socket.on("user-login", (data) => loginEventHandler(socket, data));
 });
 
 const PORT = process.env.PORT || 3005;
@@ -29,3 +31,29 @@ const PORT = process.env.PORT || 3005;
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+// Socket events
+
+const loginEventHandler = (socket, data) => {
+  socket.join("logged-users");
+
+  onlineUsers[socket.id] = {
+    username: data.username,
+  };
+  console.log(onlineUsers);
+
+  io.to("logged-users").emit("online-users", convertOnlineUsersToArray());
+};
+
+const convertOnlineUsersToArray = () => {
+  const onlineUsersArray = [];
+
+  Object.entries(onlineUsers).forEach(([key, value]) => {
+    onlineUsersArray.push({
+      socketId: key,
+      username: value.username,
+    });
+  });
+
+  return onlineUsersArray;
+};

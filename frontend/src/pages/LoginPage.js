@@ -13,11 +13,12 @@ const isUsernameValid = (username) => {
 const LoginPage = () => {
   const [username, setUsername] = useState("");
   const navigate = useNavigate();
+
   socket = io("http://localhost:3005");
 
   const handleLogin = () => {
-    /* Add sending to socket.io */
-    socket.emit("user-login", username);
+    console.log("username", username);
+    socket.emit("user-login", { username });
     navigate("/videochat");
   };
 
