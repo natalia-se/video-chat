@@ -1,10 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Bg from "../images/bg-image.jpg";
 import clsx from "clsx";
-import io from "socket.io-client";
-
-let socket = null;
+import { connectWithSocketIOServer, login } from "../socketConnection";
 
 const isUsernameValid = (username) => {
   return username.length > 0 && username.length < 10 && !username.includes(" ");
@@ -14,13 +12,14 @@ const LoginPage = () => {
   const [username, setUsername] = useState("");
   const navigate = useNavigate();
 
-  socket = io("http://localhost:3005");
-
   const handleLogin = () => {
-    console.log("username", username);
-    socket.emit("user-login", { username });
+    login({ username });
     navigate("/videochat");
   };
+
+  useEffect(() => {
+    connectWithSocketIOServer();
+  }, []);
 
   return (
     <div className="container mx-auto">
