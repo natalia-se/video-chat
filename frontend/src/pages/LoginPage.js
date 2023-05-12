@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Bg from "../images/bg-image.jpg";
 import clsx from "clsx";
 import { connectWithSocketIOServer, login } from "../socketConnection";
+import { connectWithPeerServer } from "../webRTCHandler";
 
 const isUsernameValid = (username) => {
   return username.length > 0 && username.length < 10 && !username.includes(" ");
@@ -19,6 +20,7 @@ const LoginPage = () => {
 
   useEffect(() => {
     connectWithSocketIOServer();
+    connectWithPeerServer();
   }, []);
 
   return (
