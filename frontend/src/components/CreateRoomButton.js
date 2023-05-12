@@ -1,12 +1,18 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { createVideoRoom } from "../app/actions/videoRoomActions";
 
 const CreateRoomButton = () => {
+  const inRoom = useSelector((state) => state.videoRooms.inRoom);
   const navigate = useNavigate();
 
   const handleRoomCreate = () => {
-    // check if you are in the room
-    // create video room
+    if (inRoom) {
+      return alert("You are already in the room");
+    }
+
+    createVideoRoom();
     navigate("/call");
   };
 

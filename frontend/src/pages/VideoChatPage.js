@@ -1,5 +1,6 @@
 import React from "react";
 import { useSelector } from "react-redux";
+import CreateRoomButton from "../components/CreateRoomButton";
 import Bg from "../images/bg-image.jpg";
 
 const VideoChatPage = () => {
@@ -46,7 +47,7 @@ const VideoChatPage = () => {
             })}
           </div>
         </div>
-        {/* Create room buttton */}
+        <CreateRoomButton />
         {/* Join room buttton */}
       </div>
     </div>
