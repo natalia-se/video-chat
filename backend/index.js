@@ -2,6 +2,7 @@ const express = require("express");
 const http = require("http");
 const cors = require("cors");
 const { Server } = require("socket.io");
+const { PeerServer } = require("peer");
 
 const app = express();
 const server = http.createServer(app);
@@ -16,6 +17,7 @@ const io = new Server(server, {
 });
 
 let onlineUsers = {};
+let videoRooms = {};
 
 app.get("/", (req, res) => {
   res.send("Hello server is started");
@@ -24,10 +26,15 @@ app.get("/", (req, res) => {
 io.on("connection", (socket) => {
   console.log(`user connected of the id: ${socket.id}`);
   socket.on("user-login", (data) => loginEventHandler(socket, data));
+  socket.on("video-room-create", (data) =>
+    videoRoomCreateHandler(socket, data)
+  );
   socket.on("disconnect", () => {
     disconnectEventHandler(socket);
   });
 });
+
+const peerServer = PeerServer({ port: 9000, path: "/peer" });
 
 const PORT = process.env.PORT || 3005;
 
@@ -51,6 +58,22 @@ const loginEventHandler = (socket, data) => {
 const disconnectEventHandler = (socket) => {
   console.log(`user disconnected of the id: ${socket.id}`);
   removeOnlineUser(socket.id);
+};
+const videoRoomCreateHandler = (socket, data) => {
+  const { peerId, newRoomId } = data;
+
+  // adding new room
+  videoRooms[newRoomId] = {
+    participants: [
+      {
+        socketId: socket.id,
+        username: onlineUsers[socket.id].username,
+        peerId,
+      },
+    ],
+  };
+
+  console.log("new room", data);
 };
 
 // Help functions
