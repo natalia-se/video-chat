@@ -1,5 +1,5 @@
-import { setLocalStream, setRemoteStream } from "./videoRoomsSlice";
-import store from "../store/store";
+import { setLocalStream, setRemoteStream } from "./app/reducers/videoRoomSlice";
+import store from "./app/store";
 import { Peer } from "peerjs";
 
 let peer;

@@ -48,7 +48,6 @@ const VideoChatPage = () => {
         </div>
         {/* Create room buttton */}
         {/* Join room buttton */}
-        <div>Video Chat Page</div>
       </div>
     </div>
   );
