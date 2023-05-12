@@ -24,6 +24,9 @@ app.get("/", (req, res) => {
 io.on("connection", (socket) => {
   console.log(`user connected of the id: ${socket.id}`);
   socket.on("user-login", (data) => loginEventHandler(socket, data));
+  socket.on("disconnect", () => {
+    disconnectEventHandler(socket);
+  });
 });
 
 const PORT = process.env.PORT || 3005;
@@ -43,6 +46,19 @@ const loginEventHandler = (socket, data) => {
   console.log(onlineUsers);
 
   io.to("logged-users").emit("online-users", convertOnlineUsersToArray());
+};
+
+const disconnectEventHandler = (socket) => {
+  console.log(`user disconnected of the id: ${socket.id}`);
+  removeOnlineUser(socket.id);
+};
+
+// Help functions
+const removeOnlineUser = (id) => {
+  if (onlineUsers[id]) {
+    delete onlineUsers[id];
+  }
+  console.log(onlineUsers);
 };
 
 const convertOnlineUsersToArray = () => {

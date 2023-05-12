@@ -11,9 +11,14 @@ export const chatSlice = createSlice({
     setOnlineUsers: (state, action) => {
       state.onlineUsers = action.payload;
     },
+    removeDisconnectedUser: (state, action) => {
+      state.onlineUsers = state.onlineUsers.filter(
+        (onlineUser) => onlineUser.socketId !== action.payload
+      );
+    },
   },
 });
 
-export const { setOnlineUsers } = chatSlice.actions;
+export const { setOnlineUsers, removeDisconnectedUser } = chatSlice.actions;
 
 export default chatSlice.reducer;

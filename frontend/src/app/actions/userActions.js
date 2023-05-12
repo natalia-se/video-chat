@@ -1,5 +1,5 @@
 import store from "../store";
-import { setOnlineUsers } from "../reducers/chatSlice";
+import { setOnlineUsers, removeDisconnectedUser } from "../reducers/chatSlice";
 
 export const onlineUsersHandler = (socketId, usersData) => {
   store.dispatch(
@@ -12,4 +12,7 @@ export const onlineUsersHandler = (socketId, usersData) => {
       })
     )
   );
+};
+export const userDisconnectedHandler = (disconnectedUserSocketId) => {
+  store.dispatch(removeDisconnectedUser(disconnectedUserSocketId));
 };
