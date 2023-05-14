@@ -1,11 +1,28 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import CreateRoomButton from "../components/CreateRoomButton";
+import RoomJoinButton from "../components/JoinRoomButton";
 import Bg from "../images/bg-image.jpg";
+
+const convertRoomsToArray = (videoRooms) => {
+  const rooms = [];
+
+  Object.entries(videoRooms).forEach(([key, value]) => {
+    rooms.push({
+      id: key,
+      socketId: value.participants[0].socketId,
+      creatorUsername: value.participants[0].username,
+      amountOfParicipants: value.participants.length,
+    });
+  });
+
+  return rooms;
+};
 
 const VideoChatPage = () => {
   const onlineUsers = useSelector((state) => state.chat.onlineUsers);
-  console.log("users", onlineUsers);
+  const rooms = useSelector((store) => store.videoRooms.rooms);
+  console.log("rooms", rooms);
 
   return (
     <div
@@ -48,7 +65,16 @@ const VideoChatPage = () => {
           </div>
         </div>
         <CreateRoomButton />
-        {/* Join room buttton */}
+        {convertRoomsToArray(rooms).map(
+          (room) =>
+            room.amountOfParicipants < 2 && (
+              <RoomJoinButton
+                key={room.id}
+                creatorUsername={room.creatorUsername}
+                roomId={room.id}
+              />
+            )
+        )}
       </div>
     </div>
   );
