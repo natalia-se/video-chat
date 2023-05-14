@@ -29,6 +29,9 @@ io.on("connection", (socket) => {
   socket.on("video-room-create", (data) =>
     videoRoomCreateHandler(socket, data)
   );
+  socket.on("video-room-join", (data) => {
+    videoRoomJoinHandler(socket, data);
+  });
   socket.on("disconnect", () => {
     disconnectEventHandler(socket);
   });
@@ -73,7 +76,30 @@ const videoRoomCreateHandler = (socket, data) => {
     ],
   };
 
+  broadcastVideoRooms();
   console.log("new room", data);
+};
+const videoRoomJoinHandler = (socket, data) => {
+  const { roomId, peerId } = data;
+
+  if (videoRooms[roomId]) {
+    videoRooms[roomId].participants.forEach((participant) => {
+      socket.to(participant.socketId).emit("video-room-init", {
+        newParticipantPeerId: peerId,
+      });
+    });
+
+    videoRooms[roomId].participants = [
+      ...videoRooms[roomId].participants,
+      {
+        socketId: socket.id,
+        username: onlineUsers[socket.id].username,
+        peerId,
+      },
+    ];
+  }
+
+  broadcastVideoRooms();
 };
 
 // Help functions
@@ -95,4 +121,7 @@ const convertOnlineUsersToArray = () => {
   });
 
   return onlineUsersArray;
+};
+const broadcastVideoRooms = () => {
+  io.to("logged-users").emit("video-rooms", videoRooms);
 };
