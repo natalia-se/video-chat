@@ -27,15 +27,16 @@ io.on("connection", (socket) => {
   console.log(`user connected of the id: ${socket.id}`);
   socket.on("user-login", (data) => loginEventHandler(socket, data));
 
-  socket.on("video-room-create", (data) =>
-    videoRoomCreateHandler(socket, data)
-  );
+  socket.on("video-room-create", (data) => {
+    videoRoomCreateHandler(socket, data);
+  });
 
   socket.on("video-room-join", (data) => {
     videoRoomJoinHandler(socket, data);
   });
 
   socket.on("video-room-leave", (data) => {
+    console.log("leave", data);
     videoRoomLeaveHandler(socket, data);
   });
 
@@ -63,11 +64,15 @@ const loginEventHandler = (socket, data) => {
   console.log(onlineUsers);
 
   io.to("logged-users").emit("online-users", convertOnlineUsersToArray());
+
+  broadcastVideoRooms();
 };
 
 const disconnectEventHandler = (socket) => {
   console.log(`user disconnected of the id: ${socket.id}`);
   removeOnlineUser(socket.id);
+  checkIfUserIsInCall(socket);
+  broadcastDisconnectedUserDetails(socket.id);
 };
 const videoRoomCreateHandler = (socket, data) => {
   const { peerId, newRoomId } = data;
@@ -117,7 +122,7 @@ const videoRoomLeaveHandler = (socket, data) => {
     );
   }
 
-  if (videoRooms[roomId].participants.length > 0) {
+  if (videoRooms[roomId].participants?.length > 0) {
     // emit an event to the user which is in the room that he should also close his peer conection
     socket
       .to(videoRooms[roomId].participants[0].socketId)
@@ -138,6 +143,36 @@ const removeOnlineUser = (id) => {
   }
   console.log(onlineUsers);
 };
+const checkIfUserIsInCall = (socket) => {
+  Object.entries(videoRooms).forEach(([key, value]) => {
+    const participant = value.participants.find(
+      (p) => p.socketId === socket.id
+    );
+
+    if (participant) {
+      removeUserFromTheVideoRoom(socket.id, key);
+    }
+  });
+};
+
+const removeUserFromTheVideoRoom = (socketId, roomId) => {
+  videoRooms[roomId].participants = videoRooms[roomId].participants.filter(
+    (p) => p.socketId !== socketId
+  );
+
+  // remove room if no participants left in the room
+  if (videoRooms[roomId].participants.length < 1) {
+    delete videoRooms[roomId];
+  } else {
+    // if still there is a user in the room - inform him to clear his peer connection
+
+    io.to(videoRooms[roomId].participants[0].socketId).emit(
+      "video-call-disconnect"
+    );
+  }
+
+  broadcastVideoRooms();
+};
 
 const convertOnlineUsersToArray = () => {
   const onlineUsersArray = [];
@@ -153,4 +188,7 @@ const convertOnlineUsersToArray = () => {
 };
 const broadcastVideoRooms = () => {
   io.to("logged-users").emit("video-rooms", videoRooms);
+};
+const broadcastDisconnectedUserDetails = (disconnectedUserSocketId) => {
+  io.to("logged-users").emit("user-disconnected", disconnectedUserSocketId);
 };

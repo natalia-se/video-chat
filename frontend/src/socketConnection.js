@@ -1,5 +1,8 @@
 import io from "socket.io-client";
-import { onlineUsersHandler } from "./app/actions/userActions";
+import {
+  onlineUsersHandler,
+  userDisconnectedHandler,
+} from "./app/actions/userActions";
 import { videoRoomsListHandler } from "./app/actions/videoRoomActions";
 import { call, disconnect } from "./webRTCHandler";
 
@@ -23,6 +26,9 @@ export const connectWithSocketIOServer = () => {
   });
   socket.on("video-call-disconnect", () => {
     disconnect();
+  });
+  socket.on("user-disconnected", (disconnectedUserSocketId) => {
+    userDisconnectedHandler(disconnectedUserSocketId);
   });
 };
 
