@@ -1,7 +1,7 @@
 import io from "socket.io-client";
 import { onlineUsersHandler } from "./app/actions/userActions";
 import { videoRoomsListHandler } from "./app/actions/videoRoomActions";
-import { call } from "./webRTCHandler";
+import { call, disconnect } from "./webRTCHandler";
 
 let socket = null;
 
@@ -21,6 +21,9 @@ export const connectWithSocketIOServer = () => {
   socket.on("video-room-init", (data) => {
     call(data);
   });
+  socket.on("video-call-disconnect", () => {
+    disconnect();
+  });
 };
 
 export const login = (data) => {
@@ -36,4 +39,8 @@ export const joinVideoRoom = (data) => {
   console.log("emitting event to join a room");
   console.log(data);
   socket.emit("video-room-join", data);
+};
+
+export const leaveVideoRoom = (data) => {
+  socket.emit("video-room-leave", data);
 };
