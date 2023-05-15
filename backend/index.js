@@ -26,12 +26,19 @@ app.get("/", (req, res) => {
 io.on("connection", (socket) => {
   console.log(`user connected of the id: ${socket.id}`);
   socket.on("user-login", (data) => loginEventHandler(socket, data));
+
   socket.on("video-room-create", (data) =>
     videoRoomCreateHandler(socket, data)
   );
+
   socket.on("video-room-join", (data) => {
     videoRoomJoinHandler(socket, data);
   });
+
+  socket.on("video-room-leave", (data) => {
+    videoRoomLeaveHandler(socket, data);
+  });
+
   socket.on("disconnect", () => {
     disconnectEventHandler(socket);
   });
@@ -97,6 +104,28 @@ const videoRoomJoinHandler = (socket, data) => {
         peerId,
       },
     ];
+  }
+
+  broadcastVideoRooms();
+};
+const videoRoomLeaveHandler = (socket, data) => {
+  const { roomId } = data;
+
+  if (videoRooms[roomId]) {
+    videoRooms[roomId].participants = videoRooms[roomId].participants.filter(
+      (p) => p.socketId !== socket.id
+    );
+  }
+
+  if (videoRooms[roomId].participants.length > 0) {
+    // emit an event to the user which is in the room that he should also close his peer conection
+    socket
+      .to(videoRooms[roomId].participants[0].socketId)
+      .emit("video-call-disconnect");
+  }
+
+  if (videoRooms[roomId].participants.length < 1) {
+    delete videoRooms[roomId];
   }
 
   broadcastVideoRooms();
